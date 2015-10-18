@@ -4,17 +4,17 @@ object ParDemoApp {
 
   def main(args: Array[String]) {
     val ints = IndexedSeq(1, 2, 1, 3, 6)
-    println(sum(ints))
+    println(sum(ints).run)
   }
 
-  def sum(ints: IndexedSeq[Int]): Int = {
+  def sum(ints: IndexedSeq[Int]): Par[Int] = {
     if(ints.size <= 1)
-      ints.headOption.getOrElse(0)
+      Par.unit(ints.headOption.getOrElse(0))
     else{
       val (l, r) = ints.splitAt(ints.length/2)
-      val sum1: Par[Int] = Par.unit(sum(l))
-      val sum2: Par[Int] = Par.unit(sum(r))
-      sum1.get + sum2.get
+      val sum1: Par[Int] = sum(l)
+      val sum2: Par[Int] = sum(r)
+      Par.map2(Par.fork(sum1), Par.fork(sum2))(_+_)
     }
   }
 }
